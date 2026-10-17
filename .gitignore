@@ -1,0 +1,22 @@
+# Java Compiled & Packages
+*.class
+*.jar
+*.war
+
+# Build outputs
+target/
+build/
+bin/
+out/
+
+# IDEs
+.idea/
+.vscode/
+.settings/
+*.iml
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
