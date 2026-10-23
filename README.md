@@ -33,17 +33,21 @@ classDiagram
         # firstName : String
         # lastName : String
         # email : String
+        + User(userID, firstName, lastName, email) void
         + getFullName() String
         + updateProfile(firstName, lastName, email) void
-        # formatUserInfo() String
     }
     class PropertyOwner {
         - ownedProperties : List~Property~
+
+        + PropertyOwner(userID, firstName, lastName, email)\
         + createProperty(propertyID, description, rentalRate) Property
         + getProperties() List~Property~
     }
     class Tenant {
         - rentalContracts : List~RentalContract~
+
+        + Tenant(userID, firstName, lastName, email)
         + rentProperty(contractID, property, startDate, endDate) RentalContract
         + getRentalContracts() List~RentalContract~
     }
@@ -52,6 +56,8 @@ classDiagram
         - description : String
         - rentalRate : double
         - isAvailable : boolean
+
+        + Property(propertyID, description, rentalRate) -
         + updateDescription(description) void
         + updateRentalRate(rentalRate) void
     }
@@ -63,6 +69,7 @@ classDiagram
         - endDate : LocalDate
         - rentAmount : double
         - isActive : boolean
+        
         + terminate() void
     }
 
