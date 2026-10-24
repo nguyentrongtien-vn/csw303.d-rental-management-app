@@ -1,4 +1,3 @@
-
 public class Property {
     private int propertyID;
     private String description;
@@ -7,7 +6,8 @@ public class Property {
 
     public Property(int propertyID, String description, double rentalRate) {
         if (rentalRate <= 0) {
-            throw new IllegalArgumentException("Rental rate must be greater than zero.");
+            throw new IllegalArgumentException(
+                    "Rental rate must be greater than zero.");
         }
 
         this.propertyID = propertyID;
@@ -22,7 +22,8 @@ public class Property {
 
     public void UpdateRentalRate(double rentalRate) {
         if (rentalRate <= 0) {
-            throw new IllegalArgumentException("Rental rate must be greater than zero.");
+            throw new IllegalArgumentException(
+                    "Rental rate must be greater than zero.");
         }
 
         this.rentalRate = rentalRate;
@@ -42,5 +43,9 @@ public class Property {
 
     public boolean isAvailable() {
         return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        this.isAvailable = available;
     }
 }
