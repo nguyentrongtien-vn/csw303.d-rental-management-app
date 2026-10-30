@@ -10,11 +10,20 @@ public class RentalContract {
     private boolean isActive;
 
     public RentalContract(int contractID, Property property, Tenant tenant, LocalDate startDate, LocalDate endDate) {
-        if (property == null || !property.isAvailable()) {
+        // Validate everything first, so no state is changed if anything fails
+        if (property == null) {
+            throw new IllegalArgumentException("Property must not be null.");
+        }
+        if (tenant == null) {
+            throw new IllegalArgumentException("Tenant must not be null.");
+        }
+        if (!property.isAvailable()) {
             throw new IllegalStateException("Property is not available for rent.");
         }
-
-        if (startDate == null || endDate == null || !endDate.isAfter(startDate)) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date must not be null.");
+        }
+        if (!endDate.isAfter(startDate)) {
             throw new IllegalArgumentException("End date must be later than start date.");
         }
 
@@ -59,7 +68,7 @@ public class RentalContract {
 
     public void terminate() {
         if (!isActive) {
-            return;
+            return; 
         }
         this.isActive = false;
         this.property.setAvailable(true);
