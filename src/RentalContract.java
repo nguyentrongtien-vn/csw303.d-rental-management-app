@@ -1,3 +1,4 @@
+
 import java.time.LocalDate;
 
 public class RentalContract {
@@ -11,6 +12,9 @@ public class RentalContract {
 
     public RentalContract(int contractID, Property property, Tenant tenant, LocalDate startDate, LocalDate endDate) {
         // Validate everything first, so no state is changed if anything fails
+        if (contractID <= 0) {
+            throw new IllegalArgumentException("Contract ID must be a positive integer.");
+        }
         if (property == null) {
             throw new IllegalArgumentException("Property must not be null.");
         }
@@ -68,7 +72,7 @@ public class RentalContract {
 
     public void terminate() {
         if (!isActive) {
-            return; 
+            return;
         }
         this.isActive = false;
         this.property.setAvailable(true);
