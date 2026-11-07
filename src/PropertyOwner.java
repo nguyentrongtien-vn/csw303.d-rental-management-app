@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +12,13 @@ public class PropertyOwner extends User {
     }
 
     public Property createProperty(int propertyID, String description, double rentalRate) {
-        Property newProperty = new Property(propertyID, description, rentalRate);
-        this.ownedProperties.add(newProperty);
-        return newProperty;
+        try {
+            Property newProperty = new Property(propertyID, description, rentalRate);
+            this.ownedProperties.add(newProperty);
+            return newProperty;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public List<Property> getProperties() {
