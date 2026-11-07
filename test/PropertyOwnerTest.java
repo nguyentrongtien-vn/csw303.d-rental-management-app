@@ -68,13 +68,13 @@ class PropertyOwnerTest {
 
         @ParameterizedTest
         @ValueSource(ints = {0, -1, -100})
-        @DisplayName("Should return null and preserve list state when propertyID is 0 or negative")
-        void invalidPropertyId_returnsNullAndPreservesState(int invalidId) {
-            // Action
-            Property result = owner.createProperty(invalidId, "Valid Description", 5000.0);
-
-            // Assert: The try-catch block should catch the Exception, return null
-            assertNull(result, "Expected null when propertyID is <= 0");
+        @DisplayName("Should throw IllegalArgumentException and preserve list state when propertyID is 0 or negative")
+        void invalidPropertyId_throwsExceptionAndPreservesState(int invalidId) {
+            // Action & Assert: Expect IllegalArgumentException
+            assertThrows(IllegalArgumentException.class, 
+                () -> owner.createProperty(invalidId, "Valid Description", 5000.0),
+                "Expected IllegalArgumentException when propertyID is <= 0"
+            );
             
             // Critical: Ensure no garbage data was added to the list
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
@@ -82,26 +82,26 @@ class PropertyOwnerTest {
 
         @ParameterizedTest
         @ValueSource(doubles = {0.0, -0.1, -500.0})
-        @DisplayName("Should return null and preserve list state when rentalRate is 0 or negative")
-        void invalidRentalRate_returnsNullAndPreservesState(double invalidRate) {
-            // Action
-            Property result = owner.createProperty(102, "Valid Description", invalidRate);
-
-            // Assert
-            assertNull(result, "Expected null when rentalRate is <= 0");
+        @DisplayName("Should throw IllegalArgumentException and preserve list state when rentalRate is 0 or negative")
+        void invalidRentalRate_throwsExceptionAndPreservesState(double invalidRate) {
+            // Action & Assert
+            assertThrows(IllegalArgumentException.class, 
+                () -> owner.createProperty(102, "Valid Description", invalidRate),
+                "Expected IllegalArgumentException when rentalRate is <= 0"
+            );
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
         }
 
         @ParameterizedTest
         @NullAndEmptySource
-        @ValueSource(strings = {"   "}) // Also test blank strings
-        @DisplayName("Should return null and preserve list state when description is null or empty")
-        void invalidDescription_returnsNullAndPreservesState(String invalidDescription) {
-            // Action
-            Property result = owner.createProperty(103, invalidDescription, 5000.0);
-
-            // Assert
-            assertNull(result, "Expected null when description is invalid");
+        @ValueSource(strings = {"   "}) 
+        @DisplayName("Should throw IllegalArgumentException and preserve list state when description is null or empty")
+        void invalidDescription_throwsExceptionAndPreservesState(String invalidDescription) {
+            // Action & Assert
+            assertThrows(IllegalArgumentException.class, 
+                () -> owner.createProperty(103, invalidDescription, 5000.0),
+                "Expected IllegalArgumentException when description is invalid"
+            );
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
         }
     }
