@@ -1,3 +1,4 @@
+package model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,13 +15,12 @@ public class Tenant extends User {
     }
 
     public RentalContract rentProperty(int contractId, Property property,
-                                       LocalDate startDate, LocalDate endDate) {
+            LocalDate startDate, LocalDate endDate) {
 
         // RentalContract handles validation.
         // If construction fails, nothing is added to the list.
         RentalContract contract = new RentalContract(
-            contractId, property, this, startDate, endDate
-        );
+                contractId, property, this, startDate, endDate);
 
         // Add only after successful construction.
         rentalContracts.add(contract);

@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import model.Property;
+import model.RentalContract;
+import model.Tenant;
+
 public class TenantTest {
 
     private Tenant tenant;

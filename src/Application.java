@@ -1,5 +1,9 @@
-
 import java.time.LocalDate;
+
+import model.Property;
+import model.PropertyOwner;
+import model.RentalContract;
+import model.Tenant;
 
 public class Application {
         public static void main(String[] args) {
@@ -9,8 +13,8 @@ public class Application {
                 LocalDate end = LocalDate.of(2027, 10, 31);
 
                 // CreateProperty: the property is registered with its owner
-                Property property = owner.CreateProperty(101, "Apartment A101, two bedrooms", 5000);
-                require(owner.GetProperties().contains(property), "CreateProperty should register the property.");
+                Property property = owner.createProperty(101, "Apartment A101, two bedrooms", 5000);
+                require(owner.getProperties().contains(property), "CreateProperty should register the property.");
 
                 // rentProperty: contract is created, stored, and the property becomes
                 // unavailable

@@ -1,4 +1,4 @@
-
+package model;
 
 public class Property {
     private int propertyID;
