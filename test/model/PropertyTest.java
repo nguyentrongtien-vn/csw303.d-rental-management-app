@@ -1,3 +1,4 @@
+package model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -5,8 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import model.Property;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +33,7 @@ class PropertyTest {
         }
 
         @ParameterizedTest
-        @ValueSource(ints = {0, -1, -100})
+        @ValueSource(ints = { 0, -1, -100 })
         @DisplayName("Should reject non-positive property ID")
         void invalidPropertyId_throwsException(int invalidId) {
             assertThrows(IllegalArgumentException.class,
@@ -71,8 +70,7 @@ class PropertyTest {
                     () -> assertThrows(IllegalArgumentException.class,
                             () -> new Property(101, "Apartment A101", Double.POSITIVE_INFINITY)),
                     () -> assertThrows(IllegalArgumentException.class,
-                            () -> new Property(101, "Apartment A101", Double.NEGATIVE_INFINITY))
-            );
+                            () -> new Property(101, "Apartment A101", Double.NEGATIVE_INFINITY)));
         }
     }
 
@@ -124,8 +122,7 @@ class PropertyTest {
                     () -> assertThrows(IllegalArgumentException.class,
                             () -> property.UpdateRentalRate(Double.NaN)),
                     () -> assertThrows(IllegalArgumentException.class,
-                            () -> property.UpdateRentalRate(Double.POSITIVE_INFINITY))
-            );
+                            () -> property.UpdateRentalRate(Double.POSITIVE_INFINITY)));
 
             assertEquals(5000.50, property.getRentalRate(), 0.000001);
         }

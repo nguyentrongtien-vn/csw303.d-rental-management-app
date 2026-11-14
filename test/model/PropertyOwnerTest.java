@@ -1,13 +1,11 @@
 package model;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import model.Property;
-import model.PropertyOwner;
 
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
@@ -38,7 +36,7 @@ class PropertyOwnerTest {
             assertEquals("John", owner.getFirstName());
             assertEquals("Doe", owner.getLastName());
             assertEquals("johndoe@example.com", owner.getEmail());
-            
+
             // Verify ownedProperties list is initially empty
             assertTrue(owner.getProperties().isEmpty());
         }
@@ -59,7 +57,7 @@ class PropertyOwnerTest {
             assertEquals(101, newProperty.getPropertyID());
             assertEquals("Apartment A101", newProperty.getDescription());
             assertEquals(5000.50, newProperty.getRentalRate());
-            
+
             // Verify list state has mutated correctly
             List<Property> properties = owner.getProperties();
             assertEquals(1, properties.size());
@@ -72,41 +70,38 @@ class PropertyOwnerTest {
     class InvalidCreationTests {
 
         @ParameterizedTest
-        @ValueSource(ints = {0, -1, -100})
+        @ValueSource(ints = { 0, -1, -100 })
         @DisplayName("Should throw IllegalArgumentException and preserve list state when propertyID is 0 or negative")
         void invalidPropertyId_throwsExceptionAndPreservesState(int invalidId) {
             // Action & Assert: Expect IllegalArgumentException
-            assertThrows(IllegalArgumentException.class, 
-                () -> owner.createProperty(invalidId, "Valid Description", 5000.0),
-                "Expected IllegalArgumentException when propertyID is <= 0"
-            );
-            
+            assertThrows(IllegalArgumentException.class,
+                    () -> owner.createProperty(invalidId, "Valid Description", 5000.0),
+                    "Expected IllegalArgumentException when propertyID is <= 0");
+
             // Critical: Ensure no garbage data was added to the list
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
         }
 
         @ParameterizedTest
-        @ValueSource(doubles = {0.0, -0.1, -500.0})
+        @ValueSource(doubles = { 0.0, -0.1, -500.0 })
         @DisplayName("Should throw IllegalArgumentException and preserve list state when rentalRate is 0 or negative")
         void invalidRentalRate_throwsExceptionAndPreservesState(double invalidRate) {
             // Action & Assert
-            assertThrows(IllegalArgumentException.class, 
-                () -> owner.createProperty(102, "Valid Description", invalidRate),
-                "Expected IllegalArgumentException when rentalRate is <= 0"
-            );
+            assertThrows(IllegalArgumentException.class,
+                    () -> owner.createProperty(102, "Valid Description", invalidRate),
+                    "Expected IllegalArgumentException when rentalRate is <= 0");
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
         }
 
         @ParameterizedTest
         @NullAndEmptySource
-        @ValueSource(strings = {"   "}) 
+        @ValueSource(strings = { "   " })
         @DisplayName("Should throw IllegalArgumentException and preserve list state when description is null or empty")
         void invalidDescription_throwsExceptionAndPreservesState(String invalidDescription) {
             // Action & Assert
-            assertThrows(IllegalArgumentException.class, 
-                () -> owner.createProperty(103, invalidDescription, 5000.0),
-                "Expected IllegalArgumentException when description is invalid"
-            );
+            assertThrows(IllegalArgumentException.class,
+                    () -> owner.createProperty(103, invalidDescription, 5000.0),
+                    "Expected IllegalArgumentException when description is invalid");
             assertTrue(owner.getProperties().isEmpty(), "OwnedProperties list should remain empty");
         }
     }
@@ -122,11 +117,11 @@ class PropertyOwnerTest {
             owner.createProperty(101, "Apartment A101", 5000.50);
             List<Property> properties = owner.getProperties();
 
-            // Act & Assert: Attempting to modify the list externally should throw UnsupportedOperationException
-            assertThrows(UnsupportedOperationException.class, 
-                () -> properties.add(new Property(999, "Hacker Apartment", 1.0)),
-                "Should not allow external modification of the properties list"
-            );
+            // Act & Assert: Attempting to modify the list externally should throw
+            // UnsupportedOperationException
+            assertThrows(UnsupportedOperationException.class,
+                    () -> properties.add(new Property(999, "Hacker Apartment", 1.0)),
+                    "Should not allow external modification of the properties list");
         }
     }
 }
