@@ -1,4 +1,4 @@
-
+package model;
 
 public class Property {
     private int propertyID;
@@ -7,36 +7,28 @@ public class Property {
     private boolean isAvailable;
 
     public Property(int propertyID, String description, double rentalRate) {
-        if (propertyID <= 0) {
-            throw new IllegalArgumentException(
-                    "Property ID must be greater than zero.");
-        }
-
-        if (description == null || description.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Description cannot be empty.");
-        }
-
+        validatePropertyID(propertyID);
+        validateDescription(description);
         validateRentalRate(rentalRate);
 
         this.propertyID = propertyID;
-        this.description = description;
+        this.description = description.trim();
         this.rentalRate = rentalRate;
         this.isAvailable = true;
     }
 
-    public void UpdateDescription(String description) {
+    private void validatePropertyID(int propertyID) {
+        if (propertyID <= 0) {
+            throw new IllegalArgumentException(
+                    "Property ID must be greater than zero.");
+        }
+    }
+
+    private void validateDescription(String description) {
         if (description == null || description.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "Description cannot be empty.");
         }
-
-        this.description = description;
-    }
-
-    public void UpdateRentalRate(double rentalRate) {
-        validateRentalRate(rentalRate);
-        this.rentalRate = rentalRate;
     }
 
     private void validateRentalRate(double rentalRate) {
@@ -44,6 +36,16 @@ public class Property {
             throw new IllegalArgumentException(
                     "Rental rate must be a finite value greater than zero.");
         }
+    }
+
+    public void UpdateDescription(String description) {
+        validateDescription(description);
+        this.description = description.trim();
+    }
+
+    public void UpdateRentalRate(double rentalRate) {
+        validateRentalRate(rentalRate);
+        this.rentalRate = rentalRate;
     }
 
     public int getPropertyID() {
