@@ -2,8 +2,10 @@ package view;
 
 import controller.RentalController;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import model.Property;
 import model.PropertyOwner;
@@ -14,11 +16,18 @@ public class ConsoleView {
     private final RentalController controller;
     private final Scanner scanner;
 
-    // Object references kept in memory
+    // Object references kept in memory (persistence is not required)
     private final PropertyOwner owner;
     private final Tenant tenant;
     private final List<Property> properties = new ArrayList<>();
     private final List<RentalContract> contracts = new ArrayList<>();
+
+    public ConsoleView(RentalController controller) {
+        this(controller,
+                new PropertyOwner(1, "Default", "Owner", "owner@example.com"),
+                new Tenant(1, "Default", "Tenant", "tenant@example.com"),
+                System.in);
+    }
 
     public ConsoleView(RentalController controller, PropertyOwner owner, Tenant tenant) {
         this(controller, owner, tenant, System.in);
@@ -35,12 +44,13 @@ public class ConsoleView {
     public void start() {
         boolean running = true;
         while (running) {
-            if (!scanner.hasNextLine())
+            if (!scanner.hasNextLine()) {
                 break;
-            System.out.println("\n1. Create property  2. Rent  3. Terminate  4. Exit");
-            System.out.print("Choice: ");
-            String choice = scanner.nextLine().trim();
+            }
             try {
+                System.out.println("1. Create property 2. Rent 3. Terminate 4. Exit");
+                System.out.print("Choice: ");
+                String choice = scanner.nextLine().trim();
                 switch (choice) {
                     case "1" -> createProperty();
                     case "2" -> rentProperty();
@@ -51,8 +61,10 @@ public class ConsoleView {
                     }
                     default -> System.out.println("Invalid choice. Enter 1-4.");
                 }
+            } catch (NoSuchElementException e) {
+                break;
             } catch (Exception e) {
-                // Model rejected the operation: show the error, keep running
+                // Model rejected the operation: show the error message, keep running
                 String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
                 System.out.println("Error: " + msg);
             }
@@ -62,7 +74,7 @@ public class ConsoleView {
     private void createProperty() {
         int id = readInt("Property id: ");
         System.out.print("Description: ");
-        String description = scanner.nextLine();
+        String description = scanner.nextLine().trim();
         double rate = readDouble("Rental rate: ");
 
         Property p = controller.createProperty(owner, id, description, rate);
@@ -75,9 +87,16 @@ public class ConsoleView {
     }
 
     private void rentProperty() {
-        Property p = pickProperty();
-        if (p == null) return;
+        if (properties.isEmpty()) {
+            System.out.println("No properties yet. Create one first.");
+            return;
+        }
         int contractId = readInt("Contract id: ");
+        Property p = pickProperty();
+        if (p == null) {
+            return;
+        }
+
         LocalDate start = readDate("Start date (yyyy-mm-dd): ");
         LocalDate end = readDate("End date (yyyy-mm-dd): ");
 
@@ -87,7 +106,7 @@ public class ConsoleView {
             return;
         }
         contracts.add(c);
-        System.out.println("Rented. Contract #" + (contracts.size() - 1)
+        System.out.println("Rented contract #" + contractId
                 + ". Available: " + p.isAvailable());
     }
 
@@ -96,22 +115,36 @@ public class ConsoleView {
             System.out.println("No contracts yet.");
             return;
         }
-        for (int i = 0; i < contracts.size(); i++) {
-            System.out.println("[" + i + "] " + contracts.get(i));
+        for (RentalContract c : contracts) {
+            System.out.println("[" + c.getContractID() + "] Property #" + c.getProperty().getPropertyID()
+                    + " (" + c.getProperty().getDescription() + ")"
+                    + " - Rent: " + c.getRentAmount()
+                    + ", Active: " + c.isActive());
         }
-        int idx = readInt("Contract number: ");
-        if (idx < 0 || idx >= contracts.size()) {
+        int input = readInt("Contract id: ");
+        RentalContract target = null;
+        for (RentalContract c : contracts) {
+            if (c.getContractID() == input) {
+                target = c;
+                break;
+            }
+        }
+        if (target == null && input >= 0 && input < contracts.size()) {
+            target = contracts.get(input);
+        }
+        if (target == null) {
             System.out.println("Invalid contract number.");
             return;
         }
-        controller.terminateContract(contracts.get(idx));
+        controller.terminateContract(target);
         System.out.println("Contract terminated.");
         showProperties(); // shows IsAvailable after termination
     }
 
     private void showProperties() {
         for (Property p : properties) {
-            System.out.println(p + " (available: " + p.isAvailable() + ")");
+            System.out.println("[" + p.getPropertyID() + "] " + p.getDescription()
+                    + " (rate: " + p.getRentalRate() + ", available: " + p.isAvailable() + ")");
         }
     }
 
@@ -120,16 +153,21 @@ public class ConsoleView {
             System.out.println("No properties yet. Create one first.");
             return null;
         }
-        for (int i = 0; i < properties.size(); i++) {
-            Property p = properties.get(i);
-            System.out.println("[" + i + "] " + p + " (available: " + p.isAvailable() + ")");
+        for (Property p : properties) {
+            System.out.println("[" + p.getPropertyID() + "] " + p.getDescription()
+                    + " (rate: " + p.getRentalRate() + ", available: " + p.isAvailable() + ")");
         }
-        int idx = readInt("Property number: ");
-        if (idx < 0 || idx >= properties.size()) {
-            System.out.println("Invalid property number.");
-            return null;
+        int input = readInt("Property id: ");
+        for (Property p : properties) {
+            if (p.getPropertyID() == input) {
+                return p;
+            }
         }
-        return properties.get(idx);
+        if (input >= 0 && input < properties.size()) {
+            return properties.get(input);
+        }
+        System.out.println("Invalid property number.");
+        return null;
     }
 
     // ---- Input helpers: ask again on malformed input ----
@@ -160,7 +198,7 @@ public class ConsoleView {
             System.out.print(prompt);
             try {
                 return LocalDate.parse(scanner.nextLine().trim());
-            } catch (Exception e) {
+            } catch (DateTimeParseException | IllegalArgumentException e) {
                 System.out.println("Use format yyyy-mm-dd.");
             }
         }

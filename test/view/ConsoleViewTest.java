@@ -78,8 +78,7 @@ class ConsoleViewTest {
     void createPropertyInput_zeroRate_displaysErrorMessage() {
         String input = String.join("\n",
                 "1", "101", "Studio Room", "0",
-                "4"
-        ) + "\n";
+                "4") + "\n";
         provideInput(input);
 
         ConsoleView view = new ConsoleView(controller);

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PropertyOwner extends User {
-    
+
     private List<Property> ownedProperties;
 
     public PropertyOwner(int userID, String firstName, String lastName, String email) {

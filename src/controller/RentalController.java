@@ -24,10 +24,26 @@ public class RentalController {
         return tenant.rentProperty(contractId, property, startDate, endDate);
     }
 
+    @Deprecated
+    public Property CreateProperty(PropertyOwner owner, int propertyID, String description, double rentalRate) {
+        return createProperty(owner, propertyID, description, rentalRate);
+    }
+
+    @Deprecated
+    public RentalContract RentProperty(Tenant tenant, int contractId, Property property,
+            LocalDate startDate, LocalDate endDate) {
+        return rentProperty(tenant, contractId, property, startDate, endDate);
+    }
+
     public void terminateContract(RentalContract contract) {
         if (contract == null) {
             throw new IllegalArgumentException("RentalContract must not be null.");
         }
         contract.terminate();
+    }
+
+    @Deprecated
+    public void TerminateContract(RentalContract contract) {
+        terminateContract(contract);
     }
 }

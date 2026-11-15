@@ -38,14 +38,24 @@ public class Property {
         }
     }
 
-    public void UpdateDescription(String description) {
+    public void updateDescription(String description) {
         validateDescription(description);
         this.description = description.trim();
     }
 
-    public void UpdateRentalRate(double rentalRate) {
+    @Deprecated
+    public void UpdateDescription(String description) {
+        updateDescription(description);
+    }
+
+    public void updateRentalRate(double rentalRate) {
         validateRentalRate(rentalRate);
         this.rentalRate = rentalRate;
+    }
+
+    @Deprecated
+    public void UpdateRentalRate(double rentalRate) {
+        updateRentalRate(rentalRate);
     }
 
     public int getPropertyID() {
