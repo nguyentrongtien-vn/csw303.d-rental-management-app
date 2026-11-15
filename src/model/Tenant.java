@@ -1,4 +1,5 @@
 package model;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,5 +32,16 @@ public class Tenant extends User {
     public List<RentalContract> getRentalContracts() {
         // Prevent external modification of rental history.
         return Collections.unmodifiableList(rentalContracts);
+    }
+
+    @Deprecated
+    public RentalContract RentProperty(int contractId, Property property,
+            LocalDate startDate, LocalDate endDate) {
+        return rentProperty(contractId, property, startDate, endDate);
+    }
+
+    @Deprecated
+    public List<RentalContract> GetRentalContracts() {
+        return getRentalContracts();
     }
 }

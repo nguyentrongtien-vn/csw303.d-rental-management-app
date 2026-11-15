@@ -78,4 +78,9 @@ public class RentalContract {
         this.isActive = false;
         this.property.setAvailable(true);
     }
+
+    @Deprecated
+    public void Terminate() {
+        terminate();
+    }
 }

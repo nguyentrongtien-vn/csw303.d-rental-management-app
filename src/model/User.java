@@ -11,14 +11,11 @@ public class User {
 
         validateUserId(userId);
 
-        firstName = validateName(firstName, "First name");
-        lastName = validateName(lastName, "Last name");
-        email = validateEmail(email);
-
         this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+        this.firstName = validateName(firstName, "First name");
+        this.lastName = validateName(lastName, "Last name");
+        this.email = validateEmail(email);
+
     }
 
     private void validateUserId(int userId) {
@@ -59,6 +56,11 @@ public class User {
         return firstName + " " + lastName;
     }
 
+    @Deprecated
+    public String GetFullName() {
+        return getFullName();
+    }
+
     public void updateProfile(String firstName,
             String lastName, String email) {
 
@@ -71,6 +73,11 @@ public class User {
         this.firstName = newFirstName;
         this.lastName = newLastName;
         this.email = newEmail;
+    }
+
+    @Deprecated
+    public void UpdateProfile(String firstName, String lastName, String email) {
+        updateProfile(firstName, lastName, email);
     }
 
     public int getUserId() {
