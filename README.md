@@ -1,8 +1,8 @@
 # CSW303.D Rental Management Application
 
-An object-oriented Java project for managing the end-to-end rental process. The target application brings property owners, property managers, and tenants together to manage listings, leases, maintenance, payments, documents, and communication.
+An object-oriented Java application for managing the end-to-end rental process. The target system brings property owners, property managers, and tenants together to manage listings, leases, maintenance, payments, documents, and communication.
 
-> This README describes the complete project scope defined by the course requirements. The current repository is a Java prototype of the core rental domain; the broader application capabilities are part of the target system and are not all implemented yet.
+> This README describes both the broader target system scope defined by the course requirements and the current Java MVC implementation covering the core rental domain, input validation, console UI, and automated JUnit 5 test suite.
 
 ## Project goals
 
@@ -46,153 +46,146 @@ An object-oriented Java project for managing the end-to-end rental process. The 
 8. **Reporting and analytics** - Provide insights into property performance, financial activity, occupancy rates, and maintenance history.
 9. **Security and data protection** - Protect sensitive personal and financial information through appropriate security measures.
 
-## Core object-oriented model
+## Core architecture & object-oriented model
 
-The Week 2 technical specification defines these core classes and behaviors:
+The application follows the **Model–View–Controller (MVC)** architectural pattern (Week 4) built on top of the validated core domain model (Weeks 2 & 3):
+
+### MVC layers
+
+| Layer | Package / Class | Responsibilities |
+|---|---|---|
+| **Model** | `model.*` (`User`, `PropertyOwner`, `Tenant`, `Property`, `RentalContract`) | Encapsulate domain entities, business rules, state invariants, and input validation. Completely decoupled from console I/O (`Scanner` / `System.out`). |
+| **View** | `view.ConsoleView` | Provide the interactive CLI menu (`1. Create property`, `2. Rent`, `3. Terminate`, `4. Exit`), parse user input safely, and display friendly feedback without crashing on invalid operations. |
+| **Controller** | `controller.RentalController` | Coordinate user actions (`createProperty`, `rentProperty`, `terminateContract`), manage in-memory storage, prevent duplicate IDs, and delegate domain rules to the Model. |
+| **Entry Points** | `Main`, `Application` | `Main` launches the interactive MVC console application; `Application` runs an automated end-to-end demonstration of valid and invalid rental workflows. |
+
+### Core domain classes
 
 | Class | Responsibilities |
 |---|---|
-| `User` | Store the user ID, first name, last name, and email. Provide a constructor, `getFullName()`, and `updateProfile(firstName, lastName, email)`. |
-| `PropertyOwner` | Extend `User` and initialize an empty list of owned properties. `CreateProperty(propertyID, description, rentalRate)` creates and registers a `Property`; `GetProperties()` returns the owned property objects. |
-| `Tenant` | Extend `User` and initialize an empty list of rental contracts. `RentProperty(contractID, property, startDate, endDate)` creates and registers a contract; if creation fails, the contract list remains unchanged. `GetRentalContracts()` returns all contracts, including terminated contracts. |
-| `Property` | Store a unique property ID, description, monthly rental rate, and availability (initially `true`). Reject a rental rate less than or equal to zero. `UpdateDescription(description)` replaces the description; `UpdateRentalRate(rentalRate)` changes the rate only when it is valid. |
-| `RentalContract` | Store a unique contract ID, property, tenant, start date, end date, agreed monthly rent, and active status (initially `true`). A contract can be created only for an available property and a valid rental period. `Terminate()` deactivates an active contract and makes the property available; terminating an inactive contract has no effect. |
+| `User` | Store positive `userId`, validated `firstName`, `lastName`, and regex-validated `email`. Provide `getFullName()` and atomic `updateProfile(firstName, lastName, email)`. |
+| `PropertyOwner` | Extend `User` and maintain owned properties. `createProperty(propertyID, description, rentalRate)` delegates validation to `Property` and registers valid instances; `getProperties()` returns an unmodifiable list. |
+| `Tenant` | Extend `User` and maintain rental contracts. `rentProperty(contractID, property, startDate, endDate)` delegates validation to `RentalContract` and preserves contract history if creation fails; `getRentalContracts()` returns all contracts, including terminated ones. |
+| `Property` | Store a positive `propertyID`, non-blank `description`, finite positive `rentalRate`, and availability (`true` by default). `updateDescription(...)` and `updateRentalRate(...)` preserve existing values on invalid input. |
+| `RentalContract` | Store a positive `contractID`, `property`, `tenant`, `startDate`, `endDate` (strictly after `startDate`), agreed `rentAmount`, and `isActive` (`true` by default). `terminate()` deactivates an active contract and frees the property; terminating an inactive contract is a safe no-op. |
 
-### Domain relationships
+### Domain & MVC relationships
 
 - A `PropertyOwner` owns zero or more `Property` objects.
 - A `Tenant` holds zero or more `RentalContract` objects.
 - Every `RentalContract` references one `Property` and one `Tenant`.
 - `PropertyOwner` and `Tenant` inherit from `User`.
-- For the simplified rental model, a property's availability depends on whether it has an active contract, not on the current date.
+- `ConsoleView` interacts strictly with `RentalController`, which orchestrates `model` entities.
 
 ```mermaid
 classDiagram
+    direction TB
+
+    %% ===== MODEL =====
     class User {
-        - int userId
-        - String firstName
-        - String lastName
-        - String email
-        + User(int userId, String firstName, String lastName, String email)
-        + getFullName() String
-        + updateProfile(String firstName, String lastName, String email) void
-        + getUserId() int
-        + getFirstName() String
-        + getLastName() String
-        + getEmail() String
+        -int userId
+        -String firstName
+        -String lastName
+        -String email
+        +User(int userId, String firstName, String lastName, String email)
+        +getFullName() String
+        +updateProfile(String firstName, String lastName, String email) void
+        +getUserId() int
+        +getFirstName() String
+        +getLastName() String
+        +getEmail() String
     }
 
     class PropertyOwner {
-        - List~Property~ ownedProperties
-        + PropertyOwner(int userId, String firstName, String lastName, String email)
-        + CreateProperty(int propertyID, String description, double rentalRate) Property
-        + GetProperties() List~Property~
+        -List~Property~ ownedProperties
+        +PropertyOwner(int userId, String firstName, String lastName, String email)
+        +createProperty(int propertyID, String description, double rentalRate) Property
+        +getProperties() List~Property~
     }
 
     class Tenant {
-        - List~RentalContract~ rentalContracts
-        + Tenant(int userId, String firstName, String lastName, String email)
-        + RentProperty(int contractID, Property property, LocalDate startDate, LocalDate endDate) RentalContract
-        + GetRentalContracts() List~RentalContract~
+        -List~RentalContract~ rentalContracts
+        +Tenant(int userId, String firstName, String lastName, String email)
+        +rentProperty(int contractID, Property property, LocalDate startDate, LocalDate endDate) RentalContract
+        +getRentalContracts() List~RentalContract~
     }
 
     class Property {
-        - int propertyID
-        - String description
-        - double rentalRate
-        - boolean isAvailable
-        + Property(int propertyID, String description, double rentalRate)
-        + UpdateDescription(String description) void
-        + UpdateRentalRate(double rentalRate) void
-        + getPropertyID() int
-        + getDescription() String
-        + getRentalRate() double
-        + isAvailable() boolean
-        + setAvailable(boolean available) void
+        -int propertyID
+        -String description
+        -double rentalRate
+        -boolean isAvailable
+        +Property(int propertyID, String description, double rentalRate)
+        +updateDescription(String description) void
+        +updateRentalRate(double rentalRate) void
+        +getPropertyID() int
+        +getDescription() String
+        +getRentalRate() double
+        +isAvailable() boolean
+        +setAvailable(boolean available) void
     }
 
     class RentalContract {
-        - int contractID
-        - Property property
-        - Tenant tenant
-        - LocalDate startDate
-        - LocalDate endDate
-        - double rentAmount
-        - boolean isActive
-        + RentalContract(int contractID, Property property, Tenant tenant, LocalDate startDate, LocalDate endDate)
-        + getContractID() int
-        + getProperty() Property
-        + getTenant() Tenant
-        + getStartDate() LocalDate
-        + getEndDate() LocalDate
-        + getRentAmount() double
-        + isActive() boolean
-        + terminate() void
+        -int contractID
+        -Property property
+        -Tenant tenant
+        -LocalDate startDate
+        -LocalDate endDate
+        -double rentAmount
+        -boolean isActive
+        +RentalContract(int contractID, Property property, Tenant tenant, LocalDate startDate, LocalDate endDate)
+        +getContractID() int
+        +getProperty() Property
+        +getTenant() Tenant
+        +getStartDate() LocalDate
+        +getEndDate() LocalDate
+        +getRentAmount() double
+        +isActive() boolean
+        +terminate() void
     }
 
-    User <|-- PropertyOwner : extends
-    User <|-- Tenant : extends
+    %% ===== CONTROLLER =====
+    class RentalController {
+        -List~Property~ properties
+        -List~RentalContract~ contracts
+        +createProperty(int propertyID, String description, double rentalRate) Property
+        +rentProperty(int contractID, int propertyID, Tenant tenant, LocalDate startDate, LocalDate endDate) RentalContract
+        +terminateContract(int contractID) void
+        +getProperties() List~Property~
+        +getContracts() List~RentalContract~
+    }
+
+    %% ===== VIEW =====
+    class ConsoleView {
+        -RentalController controller
+        +ConsoleView(RentalController controller)
+        +start() void
+    }
+
+    %% ===== ENTRY POINTS =====
+    class Main {
+        +main(String[] args)$ void
+    }
+
+    class Application {
+        +main(String[] args)$ void
+    }
+
+    %% ===== RELATIONSHIPS =====
+    User <|-- PropertyOwner
+    User <|-- Tenant
+
     PropertyOwner "1" o-- "0..*" Property : owns
     Tenant "1" o-- "0..*" RentalContract : holds
     RentalContract "*" --> "1" Property : rents
     RentalContract "*" --> "1" Tenant : belongs to
+
+    ConsoleView --> RentalController : delegates to
+    RentalController ..> Property : manages
+    RentalController ..> RentalContract : manages
+    RentalController ..> Tenant : coordinates
+
+    Main ..> ConsoleView : creates
+    Main ..> RentalController : creates
+    Application ..> RentalController : demonstrates
 ```
-
-## Main rental workflow
-
-1. An owner creates a property listing with a description and valid monthly rental rate.
-2. A tenant selects an available property and submits a rental period.
-3. The application validates the property and dates, creates a contract with the agreed rent, and marks the property unavailable.
-4. Owners and managers track the lease and related payments, documents, messages, and maintenance activity.
-5. When the contract is terminated, it becomes inactive and the property becomes available again. The contract remains in the tenant's contract history.
-
-## Technology and project structure
-
-- **Language:** Java (JDK 8 or later)
-- **Core concepts:** classes, inheritance, object relationships, collections, and `LocalDate`
-- **Current entry point:** `Application`
-
-```text
-src/
-  Application.java
-  Property.java
-  PropertyOwner.java
-  RentalContract.java
-  Tenant.java
-  User.java
-docs/
-  requirements/
-    Group Project week 1.pdf
-    Group Project week 2.pdf
-    Group Project week 3.pdf
-```
-
-## Run the current prototype
-
-From the repository root in PowerShell, compile the Java sources and run the sample rental workflow:
-
-```powershell
-New-Item -ItemType Directory -Force out | Out-Null
-javac -d out src\*.java
-java -cp out Application
-```
-
-The current demo creates an owner, a tenant, a property, and a rental contract; displays their state; updates the property's rate; and terminates the contract. The complete capabilities described above define the target system and require further implementation beyond this demo.
-
-## Course requirements
-
-The original project description and weekly specifications are included in [`docs/requirements`](docs/requirements/).
-
-## Team
-
-| Role | Student | GitHub | Assigned classes/tasks |
-|---|---|---|---|
-| Team Lead | Nguyễn Trọng Tiến | [@nguyentrongtien-vn](https://github.com/nguyentrongtien-vn) | Project setup, Git workflow, architecture, README, `RentalContract` |
-| Member | Bùi Nguyễn Anh | [@anhbuinguyencit23](https://github.com/anhbuinguyencit23) | `PropertyOwner` |
-| Member | Nguyễn Đỗ Huy Hoàng | [@NguyenDoHuyHoang](https://github.com/NguyenDoHuyHoang) | `User`, `Tenant` |
-| Member | Nguyễn Trường Thịnh | [@thinhnguyentruongcit23-svg](https://github.com/thinhnguyentruongcit23-svg) | `Property`, application, testing |
-
-## Project links
-
-- [Trello board](https://trello.com/b/gIMEFvVa/csw303d-rental-management-app)
-- [GitHub repository](https://github.com/nguyentrongtien-vn/csw303.d-rental-management-app)

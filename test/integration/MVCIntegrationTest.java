@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("MVC End-to-End Integration Tests")
-class MCVIntegrationTest {
+class MVCIntegrationTest {
 
     private final InputStream originalIn = System.in;
     private final PrintStream originalOut = System.out;

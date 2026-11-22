@@ -1,11 +1,14 @@
 package model;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import model.Property;
+import model.RentalContract;
+import model.Tenant;
 
 import java.time.LocalDate;
 
@@ -40,7 +43,7 @@ class RentalContractTest {
             // Verify contract fields and side-effect on property availability
             assertEquals(1, contract.getContractID());
             assertTrue(contract.isActive());
-            assertFalse(property.isAvailable());
+            assertFalse(property.isAvailable()); 
             assertEquals(5000.50, contract.getRentAmount()); // Copied from property.rentalRate
         }
     }
@@ -50,12 +53,12 @@ class RentalContractTest {
     class InvalidCreationTests {
 
         @ParameterizedTest
-        @ValueSource(ints = { 0, -1, -100 })
+        @ValueSource(ints = {0, -1, -100})
         @DisplayName("Should throw exception for non-positive contractID and preserve property state")
         void invalidContractId_throwsExceptionAndPreservesState(int invalidId) {
-            assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(invalidId, property, tenant, startDate, endDate));
-
+            assertThrows(IllegalArgumentException.class, 
+                () -> new RentalContract(invalidId, property, tenant, startDate, endDate));
+            
             // Critical: Ensure property state is not mutated on failure
             assertTrue(property.isAvailable());
         }
@@ -65,11 +68,11 @@ class RentalContractTest {
         void endDateNotAfterStartDate_throwsExceptionAndPreservesState() {
             // Case 1: Equal dates
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, property, tenant, startDate, startDate));
+                () -> new RentalContract(1, property, tenant, startDate, startDate));
 
             // Case 2: Reversed dates (endDate before startDate)
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, property, tenant, endDate, startDate));
+                () -> new RentalContract(1, property, tenant, endDate, startDate));
 
             // Critical: Ensure property state is preserved
             assertTrue(property.isAvailable());
@@ -82,20 +85,19 @@ class RentalContractTest {
             new RentalContract(1, property, tenant, startDate, endDate);
             assertFalse(property.isAvailable());
 
-            // Catch the specific exception defined in your codebase
-            // (IllegalArgumentException or IllegalStateException)
+            // Catch the specific exception defined in your codebase (IllegalArgumentException or IllegalStateException)
             assertThrows(Exception.class,
-                    () -> new RentalContract(2, property, tenant, startDate, endDate));
+                () -> new RentalContract(2, property, tenant, startDate, endDate));
         }
 
         @Test
         @DisplayName("Should throw exception when property or tenant is null")
         void nullPropertyOrTenant_throwsException() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, null, tenant, startDate, endDate));
+                () -> new RentalContract(1, null, tenant, startDate, endDate));
 
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, property, null, startDate, endDate));
+                () -> new RentalContract(1, property, null, startDate, endDate));
 
             assertTrue(property.isAvailable());
         }
@@ -104,10 +106,10 @@ class RentalContractTest {
         @DisplayName("Should throw exception when startDate or endDate is null")
         void nullDates_throwsException() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, property, tenant, null, endDate));
+                () -> new RentalContract(1, property, tenant, null, endDate));
 
             assertThrows(IllegalArgumentException.class,
-                    () -> new RentalContract(1, property, tenant, startDate, null));
+                () -> new RentalContract(1, property, tenant, startDate, null));
 
             assertTrue(property.isAvailable());
         }
