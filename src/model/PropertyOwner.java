@@ -27,9 +27,4 @@ public class PropertyOwner extends User {
     public Property CreateProperty(int propertyID, String description, double rentalRate) {
         return this.createProperty(propertyID, description, rentalRate);
     }
-
-    @Deprecated
-    public List<Property> GetProperties() {
-        return this.getProperties();
-    }
 }
